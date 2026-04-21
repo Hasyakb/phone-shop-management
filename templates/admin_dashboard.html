@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+{% block page_title %}Master Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-3">
+        <div class="card text-white bg-primary mb-3">
+            <div class="card-body">
+                <h6 class="card-title">Total Shops</h6>
+                <h3>{{ total_shops }}</h3>
+                <small>{{ active_shops }} active shops</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-success mb-3">
+            <div class="card-body">
+                <h6 class="card-title">Total Customers</h6>
+                <h3>{{ total_customers }}</h3>
+                <small>Across all shops</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-info mb-3">
+            <div class="card-body">
+                <h6 class="card-title">Total Transactions</h6>
+                <h3>{{ total_transactions }}</h3>
+                <small>All sales</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-warning mb-3">
+            <div class="card-body">
+                <h6 class="card-title">Total Revenue</h6>
+                <h3>₦{{ "{:,.2f}".format(total_revenue) }}</h3>
+                <small>All shops combined</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h6 class="mb-0">Recently Added Shops</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Shop Name</th>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for shop in recent_shops %}
+                            <tr>
+                                <td>{{ shop.shop_name }}</td>
+                                <td>{{ shop.username }}</td>
+                                <td>{{ shop.email }}</td>
+                                <td>
+                                    <span class="badge {% if shop.is_active %}bg-success{% else %}bg-danger{% endif %}">
+                                        {{ 'Active' if shop.is_active else 'Disabled' }}
+                                    </span>
+                                </td>
+                                <td>{{ shop.created_at.strftime('%Y-%m-%d') if shop.created_at else '-' }}</td>
+                                <td>
+                                    <a href="{{ url_for('admin_view_shop', id=shop.id) }}" class="btn btn-sm btn-info">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-secondary text-white">
+                <h6 class="mb-0">Quick Actions</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('admin_add_shop') }}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Add New Shop
+                    </a>
+                    <a href="{{ url_for('admin_shops') }}" class="btn btn-info">
+                        <i class="fas fa-store"></i> Manage All Shops
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header bg-info text-white">
+                <h6 class="mb-0">System Info</h6>
+            </div>
+            <div class="card-body">
+                <p><i class="fas fa-user-shield"></i> Role: Master Administrator</p>
+                <p><i class="fas fa-calendar"></i> Last Login: {{ current_user.last_login.strftime('%Y-%m-%d %H:%M') if current_user.last_login else 'First login' }}</p>
+                <hr>
+                <small class="text-muted">
+                    <i class="fas fa-info-circle"></i> You have full access to manage all shops.
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

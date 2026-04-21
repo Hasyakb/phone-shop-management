@@ -1,0 +1,48 @@
+/* Custom styles for Phone Shop Management System */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.stat-card {
+    transition: transform 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(102, 126, 234, 0.1);
+}
+
+.btn-group .btn.active {
+    background-color: #667eea;
+    color: white;
+}
+
+.alert-overdue {
+    border-left: 4px solid #dc3545;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        border-left-color: #dc3545;
+    }
+    50% {
+        border-left-color: #ff6b6b;
+    }
+    100% {
+        border-left-color: #dc3545;
+    }
+}
+
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    
+    .print-only {
+        display: block !important;
+    }
+}

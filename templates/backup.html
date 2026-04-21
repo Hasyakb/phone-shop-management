@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <h2>Database Backup & Export</h2>
+            
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0">Export Data</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>Export your data to CSV files for backup or analysis.</p>
+                            <div class="d-grid gap-2">
+                                <a href="{{ url_for('export_customers') }}" class="btn btn-primary">
+                                    <i class="fas fa-users"></i> Export Customers
+                                </a>
+                                <a href="{{ url_for('export_transactions') }}" class="btn btn-success">
+                                    <i class="fas fa-shopping-cart"></i> Export Transactions
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-warning text-dark">
+                            <h5 class="mb-0">Database File Location</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>The SQLite database file is stored at:</p>
+                            <code class="d-block p-2 bg-light rounded">instance/phone_shop.db</code>
+                            <hr>
+                            <p><strong>To backup your database:</strong></p>
+                            <ol>
+                                <li>Copy the <code>phone_shop.db</code> file</li>
+                                <li>Save it to a safe location (external drive, cloud storage, etc.)</li>
+                                <li>For restoration, replace the file in the instance folder</li>
+                            </ol>
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle"></i> 
+                                <strong>WhatsApp Reminder Template:</strong><br>
+                                Copy this message for overdue customers:
+                                <textarea class="form-control mt-2" rows="3" readonly>Dear [Customer Name], this is a reminder that you have an outstanding balance of ₦[Amount] for your phone purchase. Kindly settle your payment before the due date to avoid any inconvenience. Thank you for your understanding. - Phone Shop Nigeria</textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header bg-secondary text-white">
+                            <h5 class="mb-0">System Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <table class="table">
+                                <tr>
+                                    <th>System Version:</th>
+                                    <td>1.0.0</td>
+                                </tr>
+                                <tr>
+                                    <th>Database Type:</th>
+                                    <td>SQLite (Offline)</td>
+                                </tr>
+                                <tr>
+                                    <th>Last Backup:</th>
+                                    <td>Manual backup required</td>
+                                </tr>
+                                <tr>
+                                    <th>Data Storage:</th>
+                                    <td>Local only - No cloud sync</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

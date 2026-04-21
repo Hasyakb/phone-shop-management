@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: phone-shop-management
+    runtime: python
+    repo: https://github.com/yourusername/phone-shop-management
+    plan: free
+    region: oregon
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: phone-shop-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: PYTHON_VERSION
+        value: 3.11.0
+
+databases:
+  - name: phone-shop-db
+    plan: free

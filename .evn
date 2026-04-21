@@ -1,0 +1,2 @@
+SECRET_KEY=your-super-secret-key-change-this-in-production-akla-uwiwooj-aajkkakl-aiaioo
+DATABASE_URL=postgresql://phone_user:phon123@localhost:5432/phone_shop_management

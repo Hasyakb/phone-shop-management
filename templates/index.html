@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard Overview{% endblock %}
+
+{% block content %}
+<!-- Statistics Cards -->
+<div class="row">
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <div class="stat-title">Total Sales</div>
+            <div class="stat-value">₦{{ "{:,.2f}".format(total_sales) }}</div>
+            <small class="text-muted">All time revenue</small>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="stat-title">Outstanding Debt</div>
+            <div class="stat-value text-warning">₦{{ "{:,.2f}".format(total_outstanding) }}</div>
+            <small class="text-muted">Pending payments</small>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-title">Total Customers</div>
+            <div class="stat-value">{{ total_customers }}</div>
+            <small class="text-muted">Active customers</small>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                <i class="fas fa-shopping-cart"></i>
+            </div>
+            <div class="stat-title">Transactions</div>
+            <div class="stat-value">{{ total_transactions }}</div>
+            <small class="text-muted">Total sales made</small>
+        </div>
+    </div>
+</div>
+
+<!-- Overdue Payments Alert -->
+{% if overdue_transactions %}
+<div class="row mt-3">
+    <div class="col-12">
+        <div class="alert alert-warning shadow-sm">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-bell fa-2x me-3"></i>
+                <div>
+                    <h5 class="mb-1">⚠️ Overdue Payments Alert!</h5>
+                    <p class="mb-0">You have {{ overdue_transactions|length }} customer(s) with overdue payments.</p>
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                {% for transaction in overdue_transactions[:3] %}
+                <div class="col-md-4 mb-2">
+                    <div class="p-2 bg-light rounded">
+                        <strong>{{ transaction.customer.full_name }}</strong><br>
+                        Owes: ₦{{ "{:,.2f}".format(transaction.balance) }}<br>
+                        Due: {{ transaction.due_date }}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Recent Transactions -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="table-container">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0">Recent Transactions</h5>
+                <a href="{{ url_for('transactions') }}" class="btn btn-sm btn-primary">View All</a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Customer</th>
+                            <th>Product</th>
+                            <th>Total</th>
+                            <th>Paid</th>
+                            <th>Balance</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for transaction in recent_transactions %}
+                        <tr>
+                            <td>{{ transaction.created_at.strftime('%Y-%m-%d') if transaction.created_at else '-' }}</td>
+                            <td>
+                                <strong>{{ transaction.customer.full_name if transaction.customer else 'N/A' }}</strong>
+                            </td>
+                            <td>{{ transaction.product.name if transaction.product else 'N/A' }}</td>
+                            <td>₦{{ "{:,.2f}".format(transaction.total_price) }}</td>
+                            <td>₦{{ "{:,.2f}".format(transaction.amount_paid) }}</td>
+                            <td class="{% if transaction.balance > 0 %}text-danger fw-bold{% endif %}">
+                                ₦{{ "{:,.2f}".format(transaction.balance) }}
+                            </td>
+                            <td>
+                                <span class="badge {% if transaction.status == 'PAID' %}bg-success{% elif transaction.status == 'PARTIAL' %}bg-warning{% else %}bg-danger{% endif %}">
+                                    {{ transaction.status }}
+                                </span>
+                            </td>
+                            <td>
+                                <a href="{{ url_for('receipt', id=transaction.id) }}" class="btn btn-sm btn-info" target="_blank">
+                                    <i class="fas fa-receipt"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="8" class="text-center">No transactions found</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-body text-center">
+                <i class="fas fa-user-plus fa-3x text-primary mb-3"></i>
+                <h5>Add New Customer</h5>
+                <p class="text-muted">Register a new customer to the system</p>
+                <a href="{{ url_for('add_customer') }}" class="btn btn-primary">Add Customer</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-body text-center">
+                <i class="fas fa-shopping-cart fa-3x text-success mb-3"></i>
+                <h5>New Transaction</h5>
+                <p class="text-muted">Record a new phone sale</p>
+                <a href="{{ url_for('add_transaction') }}" class="btn btn-success">Create Transaction</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-body text-center">
+                <i class="fas fa-chart-line fa-3x text-info mb-3"></i>
+                <h5>View Reports</h5>
+                <p class="text-muted">Export data and view analytics</p>
+                <a href="{{ url_for('backup') }}" class="btn btn-info text-white">View Reports</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

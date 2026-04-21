@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Shops{% endblock %}
+{% block page_title %}All Registered Shops{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Shop Owners List</h5>
+        <a href="{{ url_for('admin_add_shop') }}" class="btn btn-light btn-sm">
+            <i class="fas fa-plus"></i> Add New Shop
+        </a>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Shop Name</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for shop in shops %}
+                    <tr>
+                        <td>{{ shop.id }}</td>
+                        <td><strong>{{ shop.shop_name }}</strong></td>
+                        <td>{{ shop.username }}</td>
+                        <td>{{ shop.email }}</td>
+                        <td>{{ shop.shop_phone or '-' }}</td>
+                        <td>
+                            <span class="badge {% if shop.is_active %}bg-success{% else %}bg-danger{% endif %}">
+                                {{ 'Active' if shop.is_active else 'Disabled' }}
+                            </span>
+                        </td>
+                        <td>{{ shop.created_at.strftime('%Y-%m-%d') if shop.created_at else '-' }}</td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{{ url_for('admin_view_shop', id=shop.id) }}" class="btn btn-info" title="View">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{{ url_for('admin_edit_shop', id=shop.id) }}" class="btn btn-warning" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{{ url_for('admin_reset_password', id=shop.id) }}" class="btn btn-secondary" title="Reset Password">
+                                    <i class="fas fa-key"></i>
+                                </a>
+                                <a href="{{ url_for('admin_toggle_shop_status', id=shop.id) }}" 
+                                   class="btn {% if shop.is_active %}btn-danger{% else %}btn-success{% endif %}" 
+                                   title="{% if shop.is_active %}Disable{% else %}Enable{% endif %}"
+                                   onclick="return confirm('Are you sure you want to {% if shop.is_active %}disable{% else %}enable{% endif %} this shop?')">
+                                    <i class="fas {% if shop.is_active %}fa-ban{% else %}fa-check-circle{% endif %}"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center py-5">
+                            <i class="fas fa-store fa-3x text-muted mb-3"></i>
+                            <p>No shops registered yet.</p>
+                            <a href="{{ url_for('admin_add_shop') }}" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Add First Shop
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

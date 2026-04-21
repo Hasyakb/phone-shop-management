@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Add New Shop{% endblock %}
+{% block page_title %}Register New Phone Shop{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">Shop Registration Form</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="shop_name" class="form-label">Shop Name *</label>
+                        <input type="text" class="form-control" id="shop_name" name="shop_name" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username *</label>
+                        <input type="text" class="form-control" id="username" name="username" required>
+                        <small class="text-muted">Used for login</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email *</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="shop_phone" class="form-label">Phone Number</label>
+                        <input type="tel" class="form-control" id="shop_phone" name="shop_phone">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="shop_address" class="form-label">Address</label>
+                        <textarea class="form-control" id="shop_address" name="shop_address" rows="2"></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password *</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                        <small class="text-muted">Minimum 6 characters</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="confirm_password" class="form-label">Confirm Password *</label>
+                        <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> The shop owner will be able to manage their own customers, products, and transactions.
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save"></i> Register Shop
+                        </button>
+                        <a href="{{ url_for('admin_shops') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.querySelector('form').addEventListener('submit', function(e) {
+        var password = document.getElementById('password').value;
+        var confirm = document.getElementById('confirm_password').value;
+        
+        if (password !== confirm) {
+            e.preventDefault();
+            alert('Passwords do not match!');
+        } else if (password.length < 6) {
+            e.preventDefault();
+            alert('Password must be at least 6 characters long!');
+        }
+    });
+</script>
+{% endblock %}

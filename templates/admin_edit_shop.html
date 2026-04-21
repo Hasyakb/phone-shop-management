@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Shop{% endblock %}
+{% block page_title %}Edit Shop: {{ shop.shop_name }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-warning">
+                <h5 class="mb-0">Edit Shop Information</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="shop_name" class="form-label">Shop Name *</label>
+                        <input type="text" class="form-control" id="shop_name" name="shop_name" 
+                               value="{{ shop.shop_name }}" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email *</label>
+                        <input type="email" class="form-control" id="email" name="email" 
+                               value="{{ shop.email }}" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="shop_phone" class="form-label">Phone Number</label>
+                        <input type="tel" class="form-control" id="shop_phone" name="shop_phone" 
+                               value="{{ shop.shop_phone or '' }}">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="shop_address" class="form-label">Address</label>
+                        <textarea class="form-control" id="shop_address" name="shop_address" rows="3">{{ shop.shop_address or '' }}</textarea>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> Username cannot be changed. To reset password, use the Reset Password option.
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-warning">
+                            <i class="fas fa-save"></i> Update Shop
+                        </button>
+                        <a href="{{ url_for('admin_shops') }}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

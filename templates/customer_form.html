@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">{{ 'Edit' if customer else 'Add New' }} Customer</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="full_name" class="form-label">Full Name *</label>
+                            <input type="text" class="form-control" id="full_name" name="full_name" 
+                                   value="{{ customer.full_name if customer else '' }}" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="phone_number" class="form-label">Phone Number *</label>
+                            <input type="tel" class="form-control" id="phone_number" name="phone_number" 
+                                   value="{{ customer.phone_number if customer else '' }}" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="address" class="form-label">Address</label>
+                            <textarea class="form-control" id="address" name="address" rows="2">{{ customer.address if customer else '' }}</textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="guarantor_name" class="form-label">Guarantor Name</label>
+                            <input type="text" class="form-control" id="guarantor_name" name="guarantor_name" 
+                                   value="{{ customer.guarantor_name if customer else '' }}">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="guarantor_phone" class="form-label">Guarantor Phone</label>
+                            <input type="tel" class="form-control" id="guarantor_phone" name="guarantor_phone" 
+                                   value="{{ customer.guarantor_phone if customer else '' }}">
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Save Customer
+                        </button>
+                        <a href="{{ url_for('customers') }}" class="btn btn-secondary">Cancel</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

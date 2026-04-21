@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col">
+            <h2>Customer Profile</h2>
+        </div>
+        <div class="col text-end">
+            <a href="{{ url_for('customers') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Customers
+            </a>
+        </div>
+    </div>
+    
+    <!-- Customer Information -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-3">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Personal Information</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-borderless">
+                        <tr>
+                            <th width="150">Full Name:</th>
+                            <td>{{ customer.full_name }}</td>
+                        </tr>
+                        <tr>
+                            <th>Phone Number:</th>
+                            <td>{{ customer.phone_number }}</td>
+                        </tr>
+                        <tr>
+                            <th>Address:</th>
+                            <td>{{ customer.address or 'Not provided' }}</td>
+                        </tr>
+                        <tr>
+                            <th>Registered:</th>
+                            <td>{{ customer.created_at.strftime('%Y-%m-%d %H:%M') if customer.created_at else '-' }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card mb-3">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Guarantor Information</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-borderless">
+                        <tr>
+                            <th width="150">Guarantor Name:</th>
+                            <td>{{ customer.guarantor_name or 'Not provided' }}</td>
+                        </tr>
+                        <tr>
+                            <th>Guarantor Phone:</th>
+                            <td>{{ customer.guarantor_phone or 'Not provided' }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Transaction History -->
+    <div class="card">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0">Transaction History</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Product</th>
+                            <th>Total Price</th>
+                            <th>Paid</th>
+                            <th>Balance</th>
+                            <th>Status</th>
+                            <th>Due Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for transaction in transactions %}
+                        <tr>
+                            <td>{{ transaction.created_at.strftime('%Y-%m-%d') if transaction.created_at else '-' }}</td>
+                            <td>{{ transaction.product.name if transaction.product else 'N/A' }}</td>
+                            <td>₦{{ "%.2f"|format(transaction.total_price) }}</td>
+                            <td>₦{{ "%.2f"|format(transaction.amount_paid) }}</td>
+                            <td>₦{{ "%.2f"|format(transaction.balance) }}</td>
+                            <td>
+                                <span class="badge {% if transaction.status == 'PAID' %}bg-success{% elif transaction.status == 'PARTIAL' %}bg-warning{% else %}bg-danger{% endif %}">
+                                    {{ transaction.status }}
+                                </span>
+                            </td>
+                            <td>{{ transaction.due_date if transaction.due_date else '-' }}</td>
+                            <td>
+                                {% if transaction.status != 'PAID' %}
+                                <a href="{{ url_for('add_payment', id=transaction.id) }}" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-money-bill"></i> Add Payment
+                                </a>
+                                {% endif %}
+                                <a href="{{ url_for('receipt', id=transaction.id) }}" class="btn btn-sm btn-secondary" target="_blank">
+                                    <i class="fas fa-receipt"></i> Receipt
+                                </a>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="8" class="text-center">No transactions found</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

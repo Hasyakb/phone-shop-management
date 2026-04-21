@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col">
+            <h2>Products Inventory</h2>
+        </div>
+        <div class="col text-end">
+            <a href="{{ url_for('add_product') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Add New Product
+            </a>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Product Name</th>
+                            <th>IMEI</th>
+                            <th>Price (₦)</th>
+                            <th>Stock Quantity</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in products %}
+                        <tr>
+                            <td>{{ product.id }}</td>
+                            <td>{{ product.name }}</td>
+                            <td>{{ product.imei or '-' }}</td>
+                            <td>₦{{ "%.2f"|format(product.price) }}</td>
+                            <td>
+                                <span class="badge {% if product.stock_quantity > 5 %}bg-success{% elif product.stock_quantity > 0 %}bg-warning{% else %}bg-danger{% endif %}">
+                                    {{ product.stock_quantity }}
+                                </span>
+                            </td>
+                            <td>
+                                <a href="{{ url_for('edit_product', id=product.id) }}" class="btn btn-sm btn-warning">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center">No products found</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block title %}View Shop Details{% endblock %}
+{% block page_title %}Shop Details: {{ shop.shop_name }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="card shadow-sm mb-3">
+            <div class="card-header bg-primary text-white">
+                <h6 class="mb-0"><i class="fas fa-store"></i> Shop Information</h6>
+            </div>
+            <div class="card-body">
+                <table class="table table-sm">
+                    <tr>
+                        <th>Shop Name:</th>
+                        <td>{{ shop.shop_name }}</td>
+                    </tr>
+                    <tr>
+                        <th>Username:</th>
+                        <td>{{ shop.username }}</td>
+                    </tr>
+                    <tr>
+                        <th>Email:</th>
+                        <td>{{ shop.email }}</td>
+                    </tr>
+                    <tr>
+                        <th>Phone:</th>
+                        <td>{{ shop.shop_phone or 'Not provided' }}</td>
+                    </tr>
+                    <tr>
+                        <th>Address:</th>
+                        <td>{{ shop.shop_address or 'Not provided' }}</td>
+                    </tr>
+                    <tr>
+                        <th>Status:</th>
+                        <td>
+                            <span class="badge {% if shop.is_active %}bg-success{% else %}bg-danger{% endif %}">
+                                {{ 'Active' if shop.is_active else 'Disabled' }}
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Created:</th>
+                        <td>{{ shop.created_at.strftime('%Y-%m-%d') if shop.created_at else '-' }}</td>
+                    </tr>
+                    <tr>
+                        <th>Last Login:</th>
+                        <td>{{ shop.last_login.strftime('%Y-%m-%d %H:%M') if shop.last_login else 'Never' }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body">
+                        <h6 class="card-title">Total Customers</h6>
+                        <h3>{{ total_customers }}</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <h6 class="card-title">Total Products</h6>
+                        <h3>{{ total_products }}</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <div class="card bg-warning text-dark">
+                    <div class="card-body">
+                        <h6 class="card-title">Total Transactions</h6>
+                        <h3>{{ total_transactions }}</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <h6 class="card-title">Total Revenue</h6>
+                        <h3>₦{{ "{:,.2f}".format(total_revenue) }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <h6 class="mb-0">Outstanding Debt: ₦{{ "{:,.2f}".format(outstanding_debt) }}</h6>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header bg-secondary text-white">
+        <h6 class="mb-0">Recent Transactions</h6>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Customer</th>
+                        <th>Product</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for transaction in recent_transactions %}
+                    <tr>
+                        <td>{{ transaction.created_at.strftime('%Y-%m-%d') }}</td>
+                        <td>{{ transaction.customer.full_name }}</td>
+                        <td>{{ transaction.product.name }}</td>
+                        <td>₦{{ "{:,.2f}".format(transaction.total_price) }}</td>
+                        <td>
+                            <span class="badge {% if transaction.status == 'PAID' %}bg-success{% elif transaction.status == 'PARTIAL' %}bg-warning{% else %}bg-danger{% endif %}">
+                                {{ transaction.status }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center">No transactions yet</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="mt-3">
+    <a href="{{ url_for('admin_shops') }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Shops
+    </a>
+</div>
+{% endblock %}
