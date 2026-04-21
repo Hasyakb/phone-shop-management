@@ -10,26 +10,17 @@ from sqlalchemy import func, or_
 
 app = Flask(__name__)
 
-# Database configuration - Use SQLite locally, PostgreSQL on Render
-if os.environ.get('RENDER'):
-    # Running on Render - use PostgreSQL
-    DATABASE_URL = os.environ.get('DATABASE_URL')
-    if DATABASE_URL and DATABASE_URL.startswith('postgres://'):
-        DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
-    app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
-    print("Using PostgreSQL on Render")
-else:
-    # Running locally - use SQLite (no C++ build tools needed!)
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///phone_shop.db'
-    print("Using SQLite for local development")
+# Database configuration - Force SQLite for all environments
+# Create instance folder if it doesn't exist
+instance_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'instance')
+os.makedirs(instance_path, exist_ok=True)
 
+# Use SQLite for both local and Render
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(instance_path, 'phone_shop.db')
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'your-secret-key-change-this')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
-    'pool_size': 10,
-    'pool_recycle': 3600,
-    'pool_pre_ping': True,
-}
+
+print(f"Using SQLite database at: {app.config['SQLALCHEMY_DATABASE_URI']}")
 
 db.init_app(app)
 login_manager = LoginManager()
