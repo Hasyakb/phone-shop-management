@@ -6,30 +6,33 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import csv
 import io
 import os
+import sys
 from sqlalchemy import func, or_
 
 app = Flask(__name__)
 
-# Database configuration - Use SQLite locally, PostgreSQL on Render
-if os.environ.get('RENDER'):
-    # Running on Render - use PostgreSQL
-    DATABASE_URL = os.environ.get('DATABASE_URL')
-    if DATABASE_URL and DATABASE_URL.startswith('postgres://'):
-        DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
-    app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
-    print("Using PostgreSQL on Render")
-else:
-    # Running locally - use SQLite (no C++ build tools needed!)
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///phone_shop.db'
-    print("Using SQLite for local development")
+# Database configuration - Force SQLite for all environments
+# Create instance folder if it doesn't exist
+instance_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'instance')
+try:
+    os.makedirs(instance_path, mode=0o755, exist_ok=True)
+    print(f"Instance folder created at: {instance_path}")
+except Exception as e:
+    print(f"Error creating instance folder: {e}")
+    sys.stdout.flush()
 
+# Use SQLite for both local and Render
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(instance_path, 'phone_shop.db')
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'your-secret-key-change-this')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
-    'pool_size': 10,
+    'connect_args': {'check_same_thread': False},
+    'pool_size': 1,
     'pool_recycle': 3600,
-    'pool_pre_ping': True,
 }
+
+print(f"Using SQLite database at: {app.config['SQLALCHEMY_DATABASE_URI']}")
+sys.stdout.flush()
 
 db.init_app(app)
 login_manager = LoginManager()
@@ -47,7 +50,12 @@ def require_master_admin():
 def create_master_admin():
     with app.app_context():
         try:
+            # Ensure tables are created
             db.create_all()
+            print("Database tables created successfully")
+            sys.stdout.flush()
+            
+            # Check if master admin exists
             master_admin = User.query.filter_by(role=UserRole.MASTER_ADMIN).first()
             if not master_admin:
                 master_admin = User(
@@ -66,6 +74,10 @@ def create_master_admin():
                 print("Username: masteradmin")
                 print("Password: Master@123")
                 print("="*50)
+                sys.stdout.flush()
+            else:
+                print("Master admin already exists")
+                sys.stdout.flush()
             
             # Create a demo shop if none exists
             demo_shop = User.query.filter_by(role=UserRole.SHOP_OWNER).first()
@@ -84,10 +96,33 @@ def create_master_admin():
                 db.session.add(demo_shop)
                 db.session.commit()
                 print("Demo shop created: demomarket / demo123")
+                sys.stdout.flush()
+            else:
+                print("Demo shop already exists")
+                sys.stdout.flush()
+                
         except Exception as e:
-            print(f"Error creating admin: {e}")
+            print(f"Error in create_master_admin: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            sys.stdout.flush()
 
-# Routes (all your existing routes go here - keeping them the same as before)
+# Test routes for debugging
+@app.route('/test')
+def test():
+    return "✅ Application is working! Database is connected."
+
+@app.route('/debug-users')
+def debug_users():
+    try:
+        with app.app_context():
+            users = User.query.all()
+            user_list = [{'username': u.username, 'role': u.role} for u in users]
+            return {'users': user_list, 'count': len(user_list)}
+    except Exception as e:
+        return {'error': str(e)}
+
+# Routes
 @app.route('/')
 def home():
     return redirect(url_for('login'))
@@ -109,6 +144,7 @@ def login():
             db.session.commit()
             flash(f'Welcome back, {user.username}!', 'success')
             
+            # Redirect based on role
             if user.role == UserRole.MASTER_ADMIN:
                 return redirect(url_for('admin_dashboard'))
             else:
@@ -635,4 +671,4 @@ if __name__ == '__main__':
         db.create_all()
         create_master_admin()
     port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port, debug=True)
+    app.run(host='0.0.0.0', port=port, debug=False)
