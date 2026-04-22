@@ -9,12 +9,21 @@
         <div class="col-md-8">
             <div class="card shadow-sm">
                 <div class="card-body text-center">
-                    <div class="mb-3">
-                        <i class="fas fa-mobile-alt fa-3x text-primary"></i>
-                    </div>
-                    <h2>{{ current_user.shop_name or 'PHONE SHOP NIGERIA' }}</h2>
-                    <p>{{ current_user.shop_address or 'Kaduna Central Market, Kaduna State' }}</p>
-                    <p>Tel: {{ current_user.shop_phone or '08012345678' }}</p>
+                    <!-- Logo Section -->
+                    {% if transaction.owner.shop_logo %}
+                        <div class="mb-3">
+                            <img src="/{{ transaction.owner.shop_logo }}" alt="{{ transaction.owner.shop_name }}" style="max-height: 100px; max-width: 200px;">
+                        </div>
+                    {% else %}
+                        <div class="mb-3">
+                            <i class="fas fa-mobile-alt fa-3x text-primary"></i>
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Shop Information -->
+                    <h2>{{ transaction.owner.shop_name or 'PHONE SHOP NIGERIA' }}</h2>
+                    <p>{{ transaction.owner.shop_address or 'Kaduna Central Market, Kaduna State' }}</p>
+                    <p>Tel: {{ transaction.owner.shop_phone or '08012345678' }}</p>
                     <hr>
                     <h4>SALES RECEIPT</h4>
                     <hr>

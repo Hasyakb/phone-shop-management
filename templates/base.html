@@ -283,9 +283,13 @@
     <!-- Sidebar -->
     <div class="sidebar">
         <div class="sidebar-header">
-            <i class="fas fa-mobile-alt" style="font-size: 2rem; color: white; margin-bottom: 10px;"></i>
-            <h4>Phone Shop Manager</h4>
-            <p>Kaduna, Nigeria</p>
+            {% if current_user.shop_logo %}
+                <img src="/{{ current_user.shop_logo }}" alt="Logo" style="max-height: 60px; margin-bottom: 10px;">
+            {% else %}
+                <i class="fas fa-mobile-alt" style="font-size: 2rem; color: white; margin-bottom: 10px;"></i>
+            {% endif %}
+            <h4>{{ current_user.shop_name or 'Phone Shop Manager' }}</h4>
+            <p>{{ current_user.shop_address or 'Kaduna, Nigeria' }}</p>
         </div>
         <div class="sidebar-nav">
             <a href="{{ url_for('dashboard') }}" class="{% if request.endpoint == 'dashboard' %}active{% endif %}">
@@ -300,6 +304,9 @@
             <a href="{{ url_for('transactions') }}" class="{% if request.endpoint == 'transactions' %}active{% endif %}">
                 <i class="fas fa-shopping-cart"></i> Transactions
             </a>
+            <a href="{{ url_for('upload_logo') }}" class="{% if request.endpoint == 'upload_logo' %}active{% endif %}">
+                <i class="fas fa-image"></i> Shop Logo
+            </a>
             <a href="{{ url_for('backup') }}" class="{% if request.endpoint == 'backup' %}active{% endif %}">
                 <i class="fas fa-database"></i> Backup
             </a>
@@ -313,9 +320,6 @@
     <div class="main-content">
         <div class="top-navbar">
             <div>
-                <button class="btn btn-link menu-toggle d-none" id="menuToggle">
-                    <i class="fas fa-bars"></i>
-                </button>
                 <span class="page-title">{% block page_title %}Dashboard{% endblock %}</span>
             </div>
             <div class="user-info">

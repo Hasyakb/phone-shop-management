@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Shop Logo{% endblock %}
+{% block page_title %}Upload Your Shop Logo{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-image"></i> Shop Logo Upload</h5>
+            </div>
+            <div class="card-body">
+                {% if current_user.shop_logo %}
+                <div class="text-center mb-4">
+                    <h6>Current Logo:</h6>
+                    <img src="/{{ current_user.shop_logo }}" alt="Shop Logo" style="max-width: 200px; max-height: 100px; border: 1px solid #ddd; padding: 10px; border-radius: 5px;">
+                    <div class="mt-2">
+                        <a href="{{ url_for('delete_logo') }}" class="btn btn-danger btn-sm" onclick="return confirm('Remove current logo?')">
+                            <i class="fas fa-trash"></i> Remove Logo
+                        </a>
+                    </div>
+                </div>
+                <hr>
+                {% endif %}
+                
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="logo" class="form-label">Select Logo Image</label>
+                        <input type="file" class="form-control" id="logo" name="logo" accept="image/*" required>
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle"></i> 
+                            Allowed formats: PNG, JPG, JPEG, GIF, SVG. Max size: 5MB
+                        </small>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-lightbulb"></i> 
+                        <strong>Tip:</strong> For best results, use a square or horizontal logo with transparent background (PNG format). Recommended size: 200x100 pixels.
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-upload"></i> Upload Logo
+                        </button>
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to Dashboard
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header bg-info text-white">
+                <h6 class="mb-0">How Logo Appears on Receipts</h6>
+            </div>
+            <div class="card-body">
+                <p>Your logo will appear at the top of all printed receipts like this:</p>
+                <div class="border p-3 text-center bg-light">
+                    {% if current_user.shop_logo %}
+                        <img src="/{{ current_user.shop_logo }}" alt="Logo Preview" style="max-height: 80px;">
+                    {% else %}
+                        <div class="text-muted">[Your logo will appear here]</div>
+                    {% endif %}
+                    <div class="mt-2">
+                        <strong>{{ current_user.shop_name or 'Your Shop Name' }}</strong><br>
+                        {{ current_user.shop_address or 'Your Shop Address' }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
