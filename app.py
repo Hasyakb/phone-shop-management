@@ -3,6 +3,7 @@ from flask_login import LoginManager, login_user, logout_user, login_required, c
 from models import db, User, Customer, Product, Transaction, Payment, UserRole
 from datetime import datetime, timedelta, date
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 import csv
 import io
 import os
@@ -19,6 +20,21 @@ try:
 except Exception as e:
     print(f"❌ Error creating instance folder: {e}")
 
+# Logo upload configuration - use static folder for direct serving
+STATIC_UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'uploads')
+try:
+    os.makedirs(STATIC_UPLOAD_FOLDER, mode=0o755, exist_ok=True)
+    print(f"✅ Upload folder created at: {STATIC_UPLOAD_FOLDER}")
+except Exception as e:
+    print(f"❌ Error creating upload folder: {e}")
+
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'svg'}
+app.config['UPLOAD_FOLDER'] = STATIC_UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024  # 5MB max file size
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 # Database configuration - SQLite
 database_path = os.path.join(instance_path, 'phone_shop.db')
 app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{database_path}'
@@ -32,6 +48,8 @@ app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
 
 print(f"📁 Database path: {database_path}")
 print(f"📁 Database exists: {os.path.exists(database_path)}")
+print(f"📁 Upload folder: {STATIC_UPLOAD_FOLDER}")
+print(f"📁 Upload folder exists: {os.path.exists(STATIC_UPLOAD_FOLDER)}")
 sys.stdout.flush()
 
 db.init_app(app)
@@ -105,8 +123,7 @@ def create_master_admin():
                     is_active=True,
                     shop_name='Demo Phone Market',
                     shop_address='Kaduna, Nigeria',
-                    shop_phone='08012345678',
-                    created_by=master_admin.id if master_admin else None
+                    shop_phone='08012345678'
                 )
                 db.session.add(demo_shop)
                 db.session.commit()
@@ -155,6 +172,82 @@ def debug_db():
             }
     except Exception as e:
         return {'error': str(e)}
+
+@app.route('/debug-logo')
+@login_required
+def debug_logo():
+    return {
+        'shop_logo_path': current_user.shop_logo,
+        'full_url': request.host_url + current_user.shop_logo if current_user.shop_logo else None,
+        'file_exists': os.path.exists(os.path.join(os.path.dirname(os.path.abspath(__file__)), current_user.shop_logo)) if current_user.shop_logo else False,
+        'upload_folder': app.config['UPLOAD_FOLDER'],
+        'upload_folder_exists': os.path.exists(app.config['UPLOAD_FOLDER'])
+    }
+
+# Logo upload routes
+@app.route('/shop/upload-logo', methods=['GET', 'POST'])
+@login_required
+def upload_logo():
+    if current_user.role == UserRole.MASTER_ADMIN:
+        flash('Master admin cannot upload shop logo', 'warning')
+        return redirect(url_for('admin_dashboard'))
+    
+    if request.method == 'POST':
+        if 'logo' not in request.files:
+            flash('No file selected', 'danger')
+            return redirect(request.url)
+        
+        file = request.files['logo']
+        
+        if file.filename == '':
+            flash('No file selected', 'danger')
+            return redirect(request.url)
+        
+        if file and allowed_file(file.filename):
+            # Delete old logo if exists
+            if current_user.shop_logo:
+                old_filepath = os.path.join(os.path.dirname(os.path.abspath(__file__)), current_user.shop_logo)
+                if os.path.exists(old_filepath):
+                    os.remove(old_filepath)
+                    print(f"✅ Deleted old logo: {old_filepath}")
+            
+            filename = secure_filename(f"shop_{current_user.id}_{int(datetime.now().timestamp())}_{file.filename}")
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(filepath)
+            print(f"✅ Logo saved to: {filepath}")
+            
+            # Save relative path for URL (without leading slash)
+            current_user.shop_logo = f"static/uploads/{filename}"
+            db.session.commit()
+            
+            flash('Logo uploaded successfully!', 'success')
+            print(f"✅ Logo URL: {current_user.shop_logo}")
+        else:
+            flash('Invalid file type. Allowed: PNG, JPG, JPEG, GIF, SVG', 'danger')
+        
+        return redirect(url_for('dashboard'))
+    
+    return render_template('upload_logo.html')
+
+@app.route('/shop/delete-logo')
+@login_required
+def delete_logo():
+    if current_user.role == UserRole.MASTER_ADMIN:
+        return redirect(url_for('admin_dashboard'))
+    
+    if current_user.shop_logo:
+        # Delete file from system
+        filepath = os.path.join(os.path.dirname(os.path.abspath(__file__)), current_user.shop_logo)
+        if os.path.exists(filepath):
+            os.remove(filepath)
+            print(f"✅ Deleted logo: {filepath}")
+        
+        # Remove from database
+        current_user.shop_logo = None
+        db.session.commit()
+        flash('Logo removed successfully!', 'success')
+    
+    return redirect(url_for('dashboard'))
 
 # Routes
 @app.route('/')
@@ -363,6 +456,23 @@ def admin_edit_shop(id):
         return redirect(url_for('admin_shops'))
     
     return render_template('admin_edit_shop.html', shop=shop)
+
+@app.route('/admin/shop/<int:id>/delete-logo')
+@login_required
+def admin_delete_shop_logo(id):
+    if current_user.role != UserRole.MASTER_ADMIN:
+        return redirect(url_for('dashboard'))
+    
+    shop = User.query.get_or_404(id)
+    if shop.shop_logo:
+        filepath = os.path.join(os.path.dirname(os.path.abspath(__file__)), shop.shop_logo)
+        if os.path.exists(filepath):
+            os.remove(filepath)
+        shop.shop_logo = None
+        db.session.commit()
+        flash(f'Logo removed from {shop.shop_name}', 'success')
+    
+    return redirect(url_for('admin_edit_shop', id=id))
 
 @app.route('/admin/shop/<int:id>/view')
 @login_required
